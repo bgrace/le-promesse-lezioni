@@ -1,0 +1,42 @@
+* Context
+The source of truth is the original EPUB export of a simplified version of "I promessi sposi". We split it into short LingQ-ready lessons using subsections marked by H3 headers like "N.M Title". Script is `split_chapters.py` (Python 3, no deps).
+
+* Done
+- [X] Detect chapters via H2 "Capitolo N"
+- [X] Detect subsections via H3 "N.M Title"
+- [X] Split into per-subsection lessons
+- [X] Produce minimal HTML output (UTF-8, headings preserved)
+- [X] Produce plain-text output (paragraph breaks preserved)
+- [X] Produce standalone EPUB output per lesson with embedded local images
+- [X] Rewrite relative image paths when output dir differs
+- [X] Generate lesson sets as HTML, TXT, and EPUB output directories
+- [X] Set the repo up as a `uv` project with a console entry point
+- [X] Use the checked-in source EPUB directly instead of relying on an exploded EPUB tree in the repo
+- [X] Isolate generated output under `generated/`
+
+* Next Steps (High-Value)
+- [ ] Length-based splitting: add `--max-words` or `--max-chars` to further split long subsections
+- [ ] Gloss cleanup: add `--strip-glosses` to remove parenthetical glosses like "(=priest)"
+- [ ] Link sanitization: strip tracking query params (`?q=...&ust=...&usg=...`) in external anchors
+- [ ] Batch packaging: add `--zip OUT.zip` to bundle all lessons for easier manual import
+- [ ] Filename templating: `--name-template "Cap-{chapter:02d}-{section:02d}-{slug}.html"`
+- [ ] Title templating: allow custom title format for lesson headings
+
+* Robustness / QA
+- [ ] Validate section counts per chapter against `nav.xhtml`; warn on missing/extra sections
+- [ ] Optionally include chapter intro blocks that precede the first H3 (if present)
+- [ ] Unicode normalization (NFC) pass to avoid import quirks
+- [ ] Basic unit tests for parser (chapter detection, section detection, resource rewriting)
+
+* LingQ Workflow Improvements
+- [X] Provide a Justfile targets: `just lessons-epub`, `just lessons-html`, `just lessons-txt`, `just check-epub`
+- [ ] Optional metadata CSV export (Title, Tags) to accompany lessons (for manual reference)
+- [ ] Option to embed a top-of-lesson source note (e.g., chapter name, original link) via flag
+
+* Code Hygiene / Docs
+- [X] Add `--help` and examples to the script
+- [ ] Expand README/AGENT_CONTEXT with LingQ tips and import screenshots (optional)
+- [ ] Add a small CHANGELOG in the repo root
+
+* Cleanup (Optional)
+- [ ] Remove early test outputs: `GoogleDoc/chapters/` and `GoogleDoc/Capitolo-*.xhtml`

@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "promessi-lessons"
+version = "0.1.0"
+description = "Split the LingQ study text into per-lesson HTML, TXT, or EPUB exports."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "B. Grace" },
+]
+dependencies = []
+
+[tool.setuptools]
+py-modules = ["split_chapters"]
