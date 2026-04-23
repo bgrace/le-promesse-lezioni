@@ -1,0 +1,327 @@
+:root {
+  --bg: #f4efe6;
+  --panel: rgba(255, 250, 242, 0.86);
+  --panel-strong: rgba(255, 251, 246, 0.96);
+  --ink: #1f2430;
+  --muted: #5e5e59;
+  --line: rgba(61, 54, 49, 0.12);
+  --brand: #8a3b2f;
+  --sage: #5d6c5c;
+  --gold: #9a6b1d;
+  --shadow: 0 24px 60px rgba(35, 27, 19, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(212, 169, 146, 0.35), transparent 32%),
+    radial-gradient(circle at top right, rgba(128, 155, 122, 0.18), transparent 24%),
+    linear-gradient(180deg, #f7f2ea 0%, var(--bg) 62%, #efe7db 100%);
+}
+
+a {
+  color: inherit;
+}
+
+.page-shell {
+  width: min(1140px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 32px 0 56px;
+}
+
+.hero,
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.hero {
+  padding: 48px;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(138, 59, 47, 0.15), transparent 22%),
+    linear-gradient(135deg, rgba(255, 252, 248, 0.95), rgba(246, 239, 229, 0.82));
+}
+
+.hero h1,
+.panel h2,
+.mini-card h3,
+.resource-card h3,
+.surface-card h3,
+.chapter-block h3 {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  line-height: 0.95;
+}
+
+.lede,
+.body-copy,
+.resource-card p,
+.surface-card p,
+.mini-card p,
+.site-footer p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.eyebrow,
+.lesson-kicker,
+.chapter-kicker,
+.overview-label,
+.resource-kind {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+.hero-actions,
+.surface-meta,
+.summary-meta,
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.hero-actions {
+  margin: 28px 0 32px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.button-primary {
+  background: var(--brand);
+  color: #fff7f1;
+}
+
+.button-secondary {
+  border: 1px solid rgba(138, 59, 47, 0.18);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.hero-stats,
+.three-up,
+.resource-grid,
+.overview-grid,
+.surface-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.hero-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.three-up,
+.resource-grid,
+.surface-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.overview-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.hero-stats li,
+.mini-card,
+.resource-card,
+.overview-card,
+.surface-card,
+.note,
+.chapter-block {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--panel-strong);
+}
+
+.hero-stats li,
+.mini-card,
+.resource-card,
+.overview-card,
+.surface-card,
+.note {
+  padding: 20px;
+}
+
+.hero-stats strong,
+.overview-card strong {
+  display: block;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: 2rem;
+}
+
+main {
+  display: grid;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.panel {
+  padding: 30px;
+}
+
+.section-heading {
+  margin-bottom: 20px;
+}
+
+.section-heading h2 {
+  margin: 6px 0 0;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.resource-card h3,
+.surface-card h3,
+.mini-card h3 {
+  margin: 10px 0 8px;
+  font-size: 1.3rem;
+}
+
+.status-tag,
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.status-ready,
+.pill-live {
+  background: rgba(93, 108, 92, 0.12);
+  color: #2f5a2f;
+}
+
+.status-planned,
+.pill-planned {
+  background: rgba(138, 59, 47, 0.1);
+  color: var(--brand);
+}
+
+.chapter-list {
+  display: grid;
+  gap: 14px;
+}
+
+.chapter-block {
+  padding: 10px 14px 14px;
+}
+
+.chapter-block summary {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+  padding: 8px 6px;
+}
+
+.chapter-block summary::-webkit-details-marker {
+  display: none;
+}
+
+.chapter-block h3 {
+  margin: 6px 0 0;
+  font-size: 1.45rem;
+}
+
+.chapter-block ol {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lesson-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(244, 239, 230, 0.72);
+}
+
+.lesson-copy strong {
+  display: block;
+  margin-top: 4px;
+}
+
+.fine-print {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.site-footer {
+  padding: 28px 10px 0;
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .three-up,
+  .resource-grid,
+  .surface-grid,
+  .overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero,
+  .panel {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 700px) {
+  .page-shell {
+    width: min(100vw - 20px, 1140px);
+    padding-top: 10px;
+  }
+
+  .hero-stats,
+  .three-up,
+  .resource-grid,
+  .surface-grid,
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chapter-block summary,
+  .lesson-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

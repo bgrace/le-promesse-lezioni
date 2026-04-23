@@ -4,5 +4,6 @@ __pycache__/
 *.egg-info/
 .DS_Store
 generated/
+cc-by-nc-4.0-derivative-works/
 .codex
 .claude

@@ -6,9 +6,9 @@ Leggiamo! open educational resources.
 
 The upstream material is published at <https://leggiamoitaliano.weebly.com/> and is presented
 there as reusable teaching material under the Creative Commons Attribution-NonCommercial 4.0
-International License. This project does not attempt to replace the upstream work. Instead, it
-reformats and republishes the Italian 102 content into cleaner, smaller, easier-to-import
-artifacts for reading systems such as LingQ and similar language-learning workflows.
+International License. This repository's `main` branch contains only the Apache-2.0 code and
+documentation needed to generate derived study artifacts. The CC BY-NC source EPUB and generated
+artifacts live on the `gh-pages` publication branch and in local ignored build output.
 
 ## Project Intent
 
@@ -20,14 +20,27 @@ and EPUB into lesson-sized files that are easier to:
 - read without unnecessary gloss clutter when hypertext lookup is already available
 - preserve in multiple formats for different study preferences
 
-The editorial transformations in this repo are intentionally modest:
+The editorial transformations are intentionally modest:
 
 - split the source into short subsection lessons
 - also provide chapter-level exports where useful
 - fix import-hostile formatting issues
 - normalize or remove broken links and redirects
 - strip page-break artifacts
-- optionally remove glosses that are less useful in hypertext reading environments
+- strip inline English glosses by default, with an option to preserve them
+
+## Branch And License Model
+
+This repo intentionally separates code from upstream-derived content.
+
+- `main`: Apache-2.0 source code, docs, build scripts, and site generator only.
+- `gh-pages`: CC BY-NC 4.0 publication branch containing the original source EPUB, generated
+  lesson artifacts, static site files, and attribution notice.
+- local output: ignored `cc-by-nc-4.0-derivative-works/` directory containing copied source and
+  generated artifacts.
+
+Users who check out only `main` should not receive a copy of the upstream-derived source EPUB or
+generated lesson artifacts.
 
 ## Upstream Source
 
@@ -39,18 +52,29 @@ The editorial transformations in this repo are intentionally modest:
 - Italian 102 audio folder:
   <https://drive.google.com/open?id=1TiD-6KvTX-qJQxcDTVanjvv2DaD6BjGQ>
 
-## What This Repo Contains
+## Local Build
 
-This repository currently combines:
+Typical workflow:
 
-- source code for extracting, cleaning, and rendering lesson artifacts
-- project documentation about the transformation pipeline and import targets
-- a checked-in source EPUB used as the transformation input
-- generated or planned lesson artifacts derived from the Italian 102 material
+```bash
+just setup-worktree
+just build
+```
 
-The checked-in source EPUB is:
+`just build` copies the canonical source EPUB from `gh-pages` into the ignored local directory,
+then emits every generated format and the static website preview.
 
-- `source/I promessi sposi Edizione semplificata.epub`
+Generated local files go under:
+
+```text
+cc-by-nc-4.0-derivative-works/
+```
+
+The original source EPUB is copied to:
+
+```text
+cc-by-nc-4.0-derivative-works/source/original/I promessi sposi Edizione semplificata.epub
+```
 
 ## Concrete Artifacts
 
@@ -59,90 +83,35 @@ The source currently yields:
 - 16 chapter units
 - 110 subsection lessons
 
-The project is designed to emit these artifact families:
+The project emits these artifact families:
 
-### 1. Lesson EPUBs
+- lesson EPUBs: `cc-by-nc-4.0-derivative-works/generated/lessons-epub/`
+- lesson HTML: `cc-by-nc-4.0-derivative-works/generated/lessons-html/`
+- lesson TXT: `cc-by-nc-4.0-derivative-works/generated/lessons-txt/`
+- chapter EPUBs: `cc-by-nc-4.0-derivative-works/generated/chapters-epub/`
+- GitHub Pages site files: `cc-by-nc-4.0-derivative-works/index.html`, `site.css`, `.nojekyll`
 
-One EPUB per subsection lesson.
-
-- Output path: `generated/lessons-epub/`
-- Filename pattern: `Capitolo-XX-YY.epub`
-- Intended use: ebook readers, portable archives, LingQ-adjacent workflows
-
-### 2. Lesson HTML
-
-One minimal HTML document per subsection lesson.
-
-- Output path: `generated/lessons-html/`
-- Filename pattern: `Capitolo-XX-YY.html`
-- Intended use: browser review, simple HTML import, visual QA
-
-### 3. Lesson TXT
-
-One plain-text file per subsection lesson.
-
-- Output path: `generated/lessons-txt/`
-- Filename pattern: `Capitolo-XX-YY.txt`
-- Intended use: the most robust plain-text import path
-
-### 4. Chapter EPUBs
-
-One EPUB per chapter.
-
-- Output path: `generated/chapters-epub/`
-- Filename pattern: `Capitolo-XX.epub`
-- Intended use: readers who prefer fewer, longer files
-
-### 5. Planned Supporting Artifacts
-
-Not all publishing surfaces necessarily exist yet, but the project is shaped to support them:
-
-- ZIP bundles for batch download
-- GitHub Pages browsing and artifact discovery
-- audio-link placeholders or mirrors
-- future lesson variants with alternate cleanup rules
-
-## Current Transformation Rules
-
-The exporter works from chapter and subsection headings in the source text:
-
-- chapter headers like `Capitolo N`
-- subsection headers like `N.M Title`
-
-Section boundaries are taken directly from those markers. The project keeps the source numbering,
-including irregularities, rather than renumbering the material into an artificial sequence.
-
-## Why This Exists
-
-The core value of the repo is not authorship of the original educational content. The value is in
-making an already generous open educational resource easier to adopt, import, study, review, and
-extend in modern reading systems.
-
-In short:
-
-- upstream provides the pedagogical adaptation
-- this repo provides the transformation and packaging layer
-
-## Local Commands
-
-Typical commands:
+## Other Commands
 
 ```bash
-just setup-worktree
+just prepare-source
 just lessons-epub
 just lessons-html
 just lessons-txt
 just chapters-epub
 just site
+just check-epub
+just clean
 ```
 
-## Attribution Note
+`just clean` removes generated local artifacts and site files but leaves the copied source EPUB in
+place. `just clean-all` removes the full ignored derivative directory.
+
+## Attribution
 
 Derived from Leggiamo! by Andrea Petri.
 
-Upstream license notice:
+Upstream educational content is licensed under CC BY-NC 4.0:
+<https://creativecommons.org/licenses/by-nc/4.0/>
 
-- Creative Commons Attribution-NonCommercial 4.0 International License
-
-When publishing derivative artifacts, keep upstream attribution and clearly describe the
-transformations applied in this repository.
+This repository's source code is licensed separately under Apache License 2.0.

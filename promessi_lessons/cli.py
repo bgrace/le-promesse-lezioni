@@ -15,6 +15,8 @@ from promessi_lessons.render import (
 from promessi_lessons.source import SourceBundle
 from promessi_lessons.xml import NS
 
+DERIVATIVE_DIR = "cc-by-nc-4.0-derivative-works"
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -56,7 +58,7 @@ def parse_args():
 
 def default_out_dir(by, out_format):
     prefix = "chapters" if by == "chapters" else "lessons"
-    return os.path.join("generated", f"{prefix}-{out_format}")
+    return os.path.join(DERIVATIVE_DIR, "generated", f"{prefix}-{out_format}")
 
 
 def make_section_content(lesson):
