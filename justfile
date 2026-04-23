@@ -11,7 +11,11 @@ default:
   @just --list
 
 sync:
+  uv venv
   uv sync
+
+setup-worktree:
+  just sync
 
 lessons-epub:
   .venv/bin/python3 split_chapters.py "{{source}}" "{{epub_dir}}"
