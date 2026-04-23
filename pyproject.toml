@@ -14,4 +14,4 @@ authors = [
 dependencies = []
 
 [tool.setuptools]
-py-modules = ["split_chapters"]
+packages = ["promessi_lessons"]

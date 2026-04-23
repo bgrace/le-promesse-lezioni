@@ -12,6 +12,13 @@ just check-epub
 
 Those commands install the local environment, emit one EPUB per subsection, and validate the generated files with `epubcheck`.
 
+The code is split into focused modules under `promessi_lessons/`:
+- `source.py` reads EPUB or XHTML input
+- `extract.py` finds chapters and numbered lessons
+- `transforms.py` runs cleanup passes before rendering
+- `render.py` writes EPUB, HTML, and TXT output
+- `cli.py` keeps the command surface thin
+
 ## Other formats
 
 ```bash
