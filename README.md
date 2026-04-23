@@ -33,6 +33,8 @@ Generated files go under `generated/` and are ignored by git.
 
 If you want the raw command, `uv run python3 split_chapters.py "source/I promessi sposi Edizione semplificata.epub" generated/lessons-epub` is the default exporter invocation.
 
+By default the pipeline strips inline English glosses such as `rammarico (= regret)`. Use `--keep-english-annotations` to preserve them.
+
 ## LingQ note
 
 The exporter is designed around shorter subsection lessons because LingQ imports and review sessions are more manageable at that size.

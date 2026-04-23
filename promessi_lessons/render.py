@@ -10,6 +10,7 @@ from promessi_lessons.model import RenderState
 from promessi_lessons.transforms import (
     CollectAssetsTransform,
     NormalizeLinksTransform,
+    StripEnglishAnnotationsTransform,
     StripPageBreaksTransform,
     TransformPipeline,
 )
@@ -163,17 +164,26 @@ def epub_css():
     ).encode("utf-8")
 
 
-def build_render_state(title_text, content_nodes, source, image_prefix):
+def build_render_state(
+    title_text,
+    content_nodes,
+    source,
+    image_prefix,
+    *,
+    strip_english_annotations=True,
+):
     nodes = [deepcopy(node) for node in content_nodes]
     state = RenderState(
         title=title_text,
         nodes=nodes,
         source=source,
         image_prefix=image_prefix,
+        strip_english_annotations=strip_english_annotations,
     )
     pipeline = TransformPipeline(
         [
             StripPageBreaksTransform(),
+            StripEnglishAnnotationsTransform(),
             NormalizeLinksTransform(),
             CollectAssetsTransform(),
         ]
@@ -181,8 +191,21 @@ def build_render_state(title_text, content_nodes, source, image_prefix):
     return pipeline.apply(state)
 
 
-def write_html(out_path, title_text, content_nodes, source):
-    state = build_render_state(title_text, content_nodes, source, image_prefix="images")
+def write_html(
+    out_path,
+    title_text,
+    content_nodes,
+    source,
+    *,
+    strip_english_annotations=True,
+):
+    state = build_render_state(
+        title_text,
+        content_nodes,
+        source,
+        image_prefix="images",
+        strip_english_annotations=strip_english_annotations,
+    )
     doc = make_doc_minimal(title_text, state.nodes)
     ET.ElementTree(doc).write(out_path, encoding="utf-8", xml_declaration=True, method="xml")
 
@@ -193,8 +216,21 @@ def write_html(out_path, title_text, content_nodes, source):
             (images_dir / asset_name).write_bytes(data)
 
 
-def write_epub(out_path, title_text, content_nodes, source):
-    state = build_render_state(title_text, content_nodes, source, image_prefix="../images")
+def write_epub(
+    out_path,
+    title_text,
+    content_nodes,
+    source,
+    *,
+    strip_english_annotations=True,
+):
+    state = build_render_state(
+        title_text,
+        content_nodes,
+        source,
+        image_prefix="../images",
+        strip_english_annotations=strip_english_annotations,
+    )
     content_doc = serialize_xml(make_epub_content_doc(title_text, state.nodes))
     nav_doc = build_nav_doc(title_text)
     manifest_items = [
@@ -266,4 +302,3 @@ def flatten_text(nodes):
 def write_text(out_path, sections):
     with open(out_path, "w", encoding="utf-8") as fh:
         fh.write("\n\n".join(sections))
-

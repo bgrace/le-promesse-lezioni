@@ -5,7 +5,13 @@ import sys
 import xml.etree.ElementTree as ET
 
 from promessi_lessons.extract import collect_chapters, collect_lessons
-from promessi_lessons.render import flatten_text, write_epub, write_html, write_text
+from promessi_lessons.render import (
+    build_render_state,
+    flatten_text,
+    write_epub,
+    write_html,
+    write_text,
+)
 from promessi_lessons.source import SourceBundle
 from promessi_lessons.xml import NS
 
@@ -32,6 +38,19 @@ def parse_args():
         default="epub",
         help="Output format for each lesson",
     )
+    parser.add_argument(
+        "--strip-english-annotations",
+        dest="strip_english_annotations",
+        action="store_true",
+        default=True,
+        help="Remove inline English glosses like '(= priest)' from the output",
+    )
+    parser.add_argument(
+        "--keep-english-annotations",
+        dest="strip_english_annotations",
+        action="store_false",
+        help="Keep inline English glosses in the output",
+    )
     return parser.parse_args()
 
 
@@ -50,7 +69,7 @@ def make_section_content(lesson):
     return [chapter_header, section_header] + lesson.nodes
 
 
-def write_chapter_outputs(chapters, out_dir, out_format, source):
+def write_chapter_outputs(chapters, out_dir, out_format, source, args):
     count = 0
     for chapter in chapters:
         name_num = f"{chapter.number:02d}"
@@ -58,13 +77,32 @@ def write_chapter_outputs(chapters, out_dir, out_format, source):
 
         if out_format == "html":
             out_path = os.path.join(out_dir, f"Capitolo-{name_num}.html")
-            write_html(out_path, title_text, chapter.nodes, source)
+            write_html(
+                out_path,
+                title_text,
+                chapter.nodes,
+                source,
+                strip_english_annotations=args.strip_english_annotations,
+            )
         elif out_format == "txt":
             out_path = os.path.join(out_dir, f"Capitolo-{name_num}.txt")
-            write_text(out_path, flatten_text(chapter.nodes))
+            state = build_render_state(
+                title_text,
+                chapter.nodes,
+                source,
+                image_prefix="images",
+                strip_english_annotations=args.strip_english_annotations,
+            )
+            write_text(out_path, flatten_text(state.nodes))
         else:
             out_path = os.path.join(out_dir, f"Capitolo-{name_num}.epub")
-            write_epub(out_path, title_text, chapter.nodes, source)
+            write_epub(
+                out_path,
+                title_text,
+                chapter.nodes,
+                source,
+                strip_english_annotations=args.strip_english_annotations,
+            )
 
         count += 1
         print(f"Wrote {out_path}")
@@ -72,7 +110,7 @@ def write_chapter_outputs(chapters, out_dir, out_format, source):
     print(f"Done. Wrote {count} files to {out_dir}")
 
 
-def write_section_outputs(lessons, out_dir, out_format, source):
+def write_section_outputs(lessons, out_dir, out_format, source, args):
     count = 0
     for lesson in lessons:
         content_nodes = make_section_content(lesson)
@@ -85,18 +123,38 @@ def write_section_outputs(lessons, out_dir, out_format, source):
 
         if out_format == "html":
             out_path = os.path.join(out_dir, f"Capitolo-{name_ch}-{name_sec}.html")
-            write_html(out_path, title_text, content_nodes, source)
+            write_html(
+                out_path,
+                title_text,
+                content_nodes,
+                source,
+                strip_english_annotations=args.strip_english_annotations,
+            )
         elif out_format == "txt":
+            state = build_render_state(
+                title_text,
+                content_nodes,
+                source,
+                image_prefix="images",
+                strip_english_annotations=args.strip_english_annotations,
+            )
+            text_nodes = state.nodes[2:]
             parts = [
                 f"Capitolo {lesson.chapter_number}",
                 f"{lesson.chapter_number}.{lesson.section_number} {lesson.title}".strip(),
-                *flatten_text(lesson.nodes),
+                *flatten_text(text_nodes),
             ]
             out_path = os.path.join(out_dir, f"Capitolo-{name_ch}-{name_sec}.txt")
             write_text(out_path, parts)
         else:
             out_path = os.path.join(out_dir, f"Capitolo-{name_ch}-{name_sec}.epub")
-            write_epub(out_path, title_text, content_nodes, source)
+            write_epub(
+                out_path,
+                title_text,
+                content_nodes,
+                source,
+                strip_english_annotations=args.strip_english_annotations,
+            )
 
         count += 1
         print(f"Wrote {out_path}")
@@ -130,7 +188,7 @@ def main():
                     file=sys.stderr,
                 )
                 sys.exit(4)
-            write_chapter_outputs(chapters, out_dir, args.format, source)
+            write_chapter_outputs(chapters, out_dir, args.format, source, args)
             return
 
         lessons, warnings = collect_lessons(nodes)
@@ -144,7 +202,6 @@ def main():
         for warning in warnings:
             print(f"Warning: {warning}", file=sys.stderr)
 
-        write_section_outputs(lessons, out_dir, args.format, source)
+        write_section_outputs(lessons, out_dir, args.format, source, args)
     finally:
         source.close()
-

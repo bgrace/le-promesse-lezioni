@@ -22,5 +22,5 @@ class RenderState:
     nodes: list[ET.Element]
     source: object
     image_prefix: str
+    strip_english_annotations: bool = True
     assets: dict[str, bytes] = field(default_factory=dict)
-
