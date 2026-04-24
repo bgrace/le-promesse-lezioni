@@ -57,6 +57,55 @@ class NormalizeLinksTransform:
                 child.set("href", rewritten)
 
 
+class StripAudioLinksTransform:
+    AUDIO_LINK_MARKER = "FILE AUDIO"
+    AUDIO_HREF_MARKERS = ("drive.google.com/",)
+
+    def apply(self, state: RenderState):
+        for node in list(state.nodes):
+            self._strip_from_parent(node)
+        state.nodes = [node for node in state.nodes if not self._is_empty_block(node)]
+
+    def _strip_from_parent(self, parent):
+        for child in list(parent):
+            self._strip_from_parent(child)
+            if self._is_audio_link(child) or self._is_empty_block(child):
+                self._remove_child(parent, child)
+
+    def _is_audio_link(self, node):
+        if node.tag != "{http://www.w3.org/1999/xhtml}a":
+            return False
+        href = node.attrib.get("href", "").lower()
+        text = " ".join(node.itertext()).strip().upper()
+        return text == self.AUDIO_LINK_MARKER or any(
+            marker in href for marker in self.AUDIO_HREF_MARKERS
+        )
+
+    def _is_empty_block(self, node):
+        block_tags = {
+            "{http://www.w3.org/1999/xhtml}span",
+            "{http://www.w3.org/1999/xhtml}p",
+            "{http://www.w3.org/1999/xhtml}div",
+        }
+        return (
+            node.tag in block_tags
+            and not "".join(node.itertext()).strip()
+            and len(node) == 0
+        )
+
+    def _remove_child(self, parent, child):
+        tail = child.tail or ""
+        children = list(parent)
+        index = children.index(child)
+        if tail:
+            if index > 0:
+                previous = children[index - 1]
+                previous.tail = (previous.tail or "") + tail
+            else:
+                parent.text = (parent.text or "") + tail
+        parent.remove(child)
+
+
 class StripEnglishAnnotationsTransform:
     def apply(self, state: RenderState):
         if not state.strip_english_annotations:

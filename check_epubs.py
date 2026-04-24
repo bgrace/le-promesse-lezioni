@@ -8,7 +8,7 @@ import sys
 
 
 EPUBCHECK_BIN = "/opt/local/bin/epubcheck"
-DEFAULT_EPUB_DIR = Path("generated/lessons-epub")
+DEFAULT_EPUB_DIR = Path("cc-by-nc-4.0-derivative-works/generated/epub")
 MAX_WORKERS = max(1, min(16, os.cpu_count() or 1))
 
 
@@ -28,7 +28,7 @@ def main():
     args = parser.parse_args()
 
     epub_dir = Path(args.epub_dir)
-    files = sorted(epub_dir.glob("*.epub"))
+    files = sorted(epub_dir.rglob("*.epub"))
     if not files:
         print(f"No EPUB files found under {epub_dir}", file=sys.stderr)
         return 1

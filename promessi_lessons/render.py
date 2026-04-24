@@ -10,6 +10,7 @@ from promessi_lessons.model import RenderState
 from promessi_lessons.transforms import (
     CollectAssetsTransform,
     NormalizeLinksTransform,
+    StripAudioLinksTransform,
     StripEnglishAnnotationsTransform,
     StripPageBreaksTransform,
     TransformPipeline,
@@ -183,6 +184,7 @@ def build_render_state(
     pipeline = TransformPipeline(
         [
             StripPageBreaksTransform(),
+            StripAudioLinksTransform(),
             StripEnglishAnnotationsTransform(),
             NormalizeLinksTransform(),
             CollectAssetsTransform(),
@@ -199,6 +201,7 @@ def write_html(
     *,
     strip_english_annotations=True,
 ):
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     state = build_render_state(
         title_text,
         content_nodes,
@@ -224,6 +227,7 @@ def write_epub(
     *,
     strip_english_annotations=True,
 ):
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     state = build_render_state(
         title_text,
         content_nodes,
@@ -300,5 +304,6 @@ def flatten_text(nodes):
 
 
 def write_text(out_path, sections):
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as fh:
         fh.write("\n\n".join(sections))

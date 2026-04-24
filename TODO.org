@@ -9,18 +9,20 @@ The source of truth is the original EPUB export of a simplified version of "I pr
 - [X] Produce plain-text output (paragraph breaks preserved)
 - [X] Produce standalone EPUB output per lesson with embedded local images
 - [X] Rewrite relative image paths when output dir differs
-- [X] Generate lesson sets as HTML, TXT, and EPUB output directories
+- [X] Generate EPUB, HTML, and TXT collections with whole-book, chapter, and section files
 - [X] Set the repo up as a `uv` project with a console entry point
-- [X] Use the checked-in source EPUB directly instead of relying on an exploded EPUB tree in the repo
-- [X] Isolate generated output under `generated/`
+- [X] Keep upstream-derived source and generated output under ignored `cc-by-nc-4.0-derivative-works/`
+- [X] Strip inline English glosses by default, with an opt-out flag
+- [X] Include section titles in section filenames
+- [X] Strip source `FILE AUDIO` links from generated products
 
 * Next Steps (High-Value)
 - [ ] Length-based splitting: add `--max-words` or `--max-chars` to further split long subsections
-- [ ] Gloss cleanup: add `--strip-glosses` to remove parenthetical glosses like "(=priest)"
 - [ ] Link sanitization: strip tracking query params (`?q=...&ust=...&usg=...`) in external anchors
 - [ ] Batch packaging: add `--zip OUT.zip` to bundle all lessons for easier manual import
 - [ ] Filename templating: `--name-template "Cap-{chapter:02d}-{section:02d}-{slug}.html"`
 - [ ] Title templating: allow custom title format for lesson headings
+- [ ] Decide whether/how/where to rehost source audio files
 
 * Robustness / QA
 - [ ] Validate section counts per chapter against `nav.xhtml`; warn on missing/extra sections

@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 @dataclass(frozen=True)
 class Chapter:
     number: int
+    title: str
     nodes: list[ET.Element]
 
 

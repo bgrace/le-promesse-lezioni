@@ -2,10 +2,9 @@ set positional-arguments
 
 derivative_dir := "cc-by-nc-4.0-derivative-works"
 source := derivative_dir / "source/original/I promessi sposi Edizione semplificata.epub"
-epub_dir := derivative_dir / "generated/lessons-epub"
-html_dir := derivative_dir / "generated/lessons-html"
-txt_dir := derivative_dir / "generated/lessons-txt"
-chapters_epub_dir := derivative_dir / "generated/chapters-epub"
+epub_dir := derivative_dir / "generated/epub"
+html_dir := derivative_dir / "generated/html"
+txt_dir := derivative_dir / "generated/txt"
 epubcheck_bin := "/opt/local/bin/epubcheck"
 
 default:
@@ -31,7 +30,7 @@ lessons-txt: prepare-source
   .venv/bin/python3 split_chapters.py "{{source}}" "{{txt_dir}}" --format=txt
 
 chapters-epub: prepare-source
-  .venv/bin/python3 split_chapters.py "{{source}}" "{{chapters_epub_dir}}" --by=chapters
+  .venv/bin/python3 split_chapters.py "{{source}}" "{{epub_dir}}" --format=epub --by=chapters
 
 check-epub:
   .venv/bin/python3 check_epubs.py "{{epub_dir}}"
@@ -49,6 +48,5 @@ build: prepare-source
   just lessons-epub
   just lessons-html
   just lessons-txt
-  just chapters-epub
   just site
   just check-epub

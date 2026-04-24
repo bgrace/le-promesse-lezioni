@@ -7,6 +7,12 @@ from pathlib import Path
 import shutil
 
 from promessi_lessons.extract import collect_chapters, collect_lessons
+from promessi_lessons.paths import (
+    BOOK_TITLE,
+    book_path,
+    chapter_path,
+    lesson_path,
+)
 from promessi_lessons.source import SourceBundle
 from promessi_lessons.xml import NS
 
@@ -61,10 +67,9 @@ UPSTREAM_MATERIALS = [
 
 
 PUBLISHING_SURFACE = [
-    ("Lesson EPUBs", "lessons-epub", "One EPUB per subsection."),
-    ("Lesson HTML", "lessons-html", "Minimal HTML with headings and local images where available."),
-    ("Lesson TXT", "lessons-txt", "Plain text lessons for robust LMS import."),
-    ("Chapter EPUBs", "chapters-epub", "One EPUB per chapter."),
+    ("EPUB collection", "epub", "Whole-book, chapter, and subsection EPUB exports."),
+    ("HTML collection", "html", "Whole-book, chapter, and subsection HTML exports."),
+    ("TXT collection", "txt", "Whole-book, chapter, and subsection plain text exports."),
     ("Original EPUB", "source", "The original, unmodified source EPUB used for reproducible builds."),
 ]
 
@@ -72,10 +77,17 @@ PUBLISHING_SURFACE = [
 @dataclass(frozen=True)
 class ChapterRow:
     number: int
+    title: str
 
     @property
     def basename(self) -> str:
         return f"Capitolo-{self.number:02d}"
+
+    @property
+    def label(self) -> str:
+        if self.title:
+            return f"Capitolo {self.number} - {self.title}"
+        return f"Capitolo {self.number}"
 
 
 @dataclass(frozen=True)
@@ -102,7 +114,7 @@ def load_catalog() -> tuple[list[ChapterRow], list[LessonRow], list[str]]:
             raise RuntimeError("Source EPUB did not contain an XHTML body.")
 
         nodes = list(body)
-        chapters = [ChapterRow(chapter.number) for chapter in collect_chapters(nodes)]
+        chapters = [ChapterRow(chapter.number, chapter.title) for chapter in collect_chapters(nodes)]
         lessons, warnings = collect_lessons(nodes)
         lesson_rows = [
             LessonRow(lesson.chapter_number, lesson.section_number, lesson.title)
@@ -115,13 +127,12 @@ def load_catalog() -> tuple[list[ChapterRow], list[LessonRow], list[str]]:
 
 def scan_existing_outputs() -> dict[str, set[str]]:
     roots = {
-        "lessons-epub": DERIVATIVE_DIR / "generated" / "lessons-epub",
-        "lessons-html": DERIVATIVE_DIR / "generated" / "lessons-html",
-        "lessons-txt": DERIVATIVE_DIR / "generated" / "lessons-txt",
-        "chapters-epub": DERIVATIVE_DIR / "generated" / "chapters-epub",
+        "epub": DERIVATIVE_DIR / "generated" / "epub",
+        "html": DERIVATIVE_DIR / "generated" / "html",
+        "txt": DERIVATIVE_DIR / "generated" / "txt",
     }
     return {
-        key: {path.name for path in directory.iterdir() if path.is_file()}
+        key: {path.relative_to(directory).as_posix() for path in directory.rglob("*") if path.is_file()}
         if directory.exists()
         else set()
         for key, directory in roots.items()
@@ -177,9 +188,9 @@ def surface_card(title: str, slug: str, description: str, existing: dict[str, se
 
 
 def lesson_row(lesson: LessonRow, existing: dict[str, set[str]]) -> str:
-    html_name = f"{lesson.basename}.html"
-    txt_name = f"{lesson.basename}.txt"
-    epub_name = f"{lesson.basename}.epub"
+    html_name = lesson_path("", lesson.chapter_number, lesson.section_number, lesson.title, "html").as_posix()
+    txt_name = lesson_path("", lesson.chapter_number, lesson.section_number, lesson.title, "txt").as_posix()
+    epub_name = lesson_path("", lesson.chapter_number, lesson.section_number, lesson.title, "epub").as_posix()
     return (
         '<li class="lesson-row">'
         '<div class="lesson-copy">'
@@ -187,9 +198,9 @@ def lesson_row(lesson: LessonRow, existing: dict[str, set[str]]) -> str:
         f"<strong>{escape(lesson.label)}</strong>"
         "</div>"
         '<div class="pill-row">'
-        + artifact_link("HTML", f"generated/lessons-html/{html_name}", html_name in existing["lessons-html"])
-        + artifact_link("TXT", f"generated/lessons-txt/{txt_name}", txt_name in existing["lessons-txt"])
-        + artifact_link("EPUB", f"generated/lessons-epub/{epub_name}", epub_name in existing["lessons-epub"])
+        + artifact_link("HTML", f"generated/html/{html_name}", html_name in existing["html"])
+        + artifact_link("TXT", f"generated/txt/{txt_name}", txt_name in existing["txt"])
+        + artifact_link("EPUB", f"generated/epub/{epub_name}", epub_name in existing["epub"])
         + "</div></li>"
     )
 
@@ -200,16 +211,18 @@ def chapter_block(
     existing: dict[str, set[str]],
     open_by_default: bool,
 ) -> str:
-    chapter_epub = f"{chapter.basename}.epub"
+    chapter_epub = chapter_path("", chapter.number, "epub").as_posix()
+    chapter_html = chapter_path("", chapter.number, "html").as_posix()
+    chapter_txt = chapter_path("", chapter.number, "txt").as_posix()
     summary = (
         f'<summary><div><span class="chapter-kicker">Chapter {chapter.number:02d}</span>'
-        f"<h3>Capitolo {chapter.number}</h3></div>"
+        f"<h3>{escape(chapter.label)}</h3></div>"
         f'<div class="summary-meta"><span>{len(lessons)} lessons</span>'
-        + artifact_link(
-            "Chapter EPUB",
-            f"generated/chapters-epub/{chapter_epub}",
-            chapter_epub in existing["chapters-epub"],
-        )
+        + '<div class="pill-row">'
+        + artifact_link("HTML", f"generated/html/{chapter_html}", chapter_html in existing["html"])
+        + artifact_link("TXT", f"generated/txt/{chapter_txt}", chapter_txt in existing["txt"])
+        + artifact_link("EPUB", f"generated/epub/{chapter_epub}", chapter_epub in existing["epub"])
+        + "</div>"
         + "</div></summary>"
     )
     open_attr = " open" if open_by_default else ""
@@ -221,19 +234,21 @@ def build_html(chapters: list[ChapterRow], lessons: list[LessonRow], warnings: l
     existing = scan_existing_outputs()
     lesson_total = len(lessons)
     chapter_total = len(chapters)
+    collection_total = lesson_total + chapter_total + 1
     counts = Counter(lesson.chapter_number for lesson in lessons)
+    normalized_epub = book_path("", "epub").as_posix()
 
     overview = "\n".join(
         [
-            overview_card("Lesson HTML", len(existing["lessons-html"]), lesson_total, "Minimal HTML exports."),
-            overview_card("Lesson TXT", len(existing["lessons-txt"]), lesson_total, "Plain text lesson exports."),
-            overview_card("Lesson EPUB", len(existing["lessons-epub"]), lesson_total, "One EPUB per subsection."),
-            overview_card("Chapter EPUB", len(existing["chapters-epub"]), chapter_total, "One EPUB per chapter."),
+            overview_card("HTML files", len(existing["html"]), collection_total, "Whole book, chapters, and lessons."),
+            overview_card("TXT files", len(existing["txt"]), collection_total, "Whole book, chapters, and lessons."),
+            overview_card("EPUB files", len(existing["epub"]), collection_total, "Whole book, chapters, and lessons."),
+            overview_card("Lessons", lesson_total, lesson_total, "Subsection-level study units."),
         ]
     )
     upstream = "\n".join(upstream_card(item) for item in UPSTREAM_MATERIALS)
     surfaces = "\n".join(
-        surface_card(title, slug, description, existing, chapter_total if slug == "chapters-epub" else lesson_total)
+        surface_card(title, slug, description, existing, 1 if slug == "source" else collection_total)
         for title, slug, description in PUBLISHING_SURFACE
     )
     chapters_html = "\n".join(
@@ -269,10 +284,11 @@ def build_html(chapters: list[ChapterRow], lessons: list[LessonRow], warnings: l
         <h1>Le Promesse Lezioni</h1>
         <p class="lede">
           Clean, lesson-sized exports derived from Andrea Petri's <em>Leggiamo 102:
-          I promessi sposi - edizione semplificata</em>, prepared for import into
+          {escape(BOOK_TITLE)}</em>, prepared for import into
           systems such as LingQ.
         </p>
         <div class="hero-actions">
+          {artifact_link("Normalized EPUB", f"generated/epub/{normalized_epub}", normalized_epub in existing["epub"])}
           <a class="button button-primary" href="source/original/{escape(SOURCE_FILENAME, quote=True)}">Original source EPUB</a>
           <a class="button button-secondary" href="https://leggiamoitaliano.weebly.com/italian-102.html">Upstream Italian 102</a>
           <a class="button button-secondary" href="ATTRIBUTION.md">Attribution</a>
@@ -344,8 +360,9 @@ def build_html(chapters: list[ChapterRow], lessons: list[LessonRow], warnings: l
           <div class="overview-grid">{overview}</div>
           {warning_note}
           <p class="body-copy">
-            The source EPUB yields {lesson_total} section-level lessons across {chapter_total} chapters.
-            Chapters 1-9 and 11-16 each expose seven subsection lessons; chapter 10 exposes five.
+            Each format contains one normalized whole-book file, {chapter_total} chapter files,
+            and {lesson_total} section-level lesson files grouped under chapter directories.
+            Each chapter exposes seven subsection lessons.
           </p>
         </section>
 

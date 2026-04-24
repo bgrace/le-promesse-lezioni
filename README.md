@@ -28,6 +28,7 @@ The editorial transformations are intentionally modest:
 - normalize or remove broken links and redirects
 - strip page-break artifacts
 - strip inline English glosses by default, with an option to preserve them
+- strip source `FILE AUDIO` links until audio hosting is resolved
 
 ## Branch And License Model
 
@@ -81,15 +82,18 @@ cc-by-nc-4.0-derivative-works/source/original/I promessi sposi Edizione semplifi
 The source currently yields:
 
 - 16 chapter units
-- 110 subsection lessons
+- 112 subsection lessons
 
 The project emits these artifact families:
 
-- lesson EPUBs: `cc-by-nc-4.0-derivative-works/generated/lessons-epub/`
-- lesson HTML: `cc-by-nc-4.0-derivative-works/generated/lessons-html/`
-- lesson TXT: `cc-by-nc-4.0-derivative-works/generated/lessons-txt/`
-- chapter EPUBs: `cc-by-nc-4.0-derivative-works/generated/chapters-epub/`
+- EPUB collection: `cc-by-nc-4.0-derivative-works/generated/epub/`
+- HTML collection: `cc-by-nc-4.0-derivative-works/generated/html/`
+- TXT collection: `cc-by-nc-4.0-derivative-works/generated/txt/`
 - GitHub Pages site files: `cc-by-nc-4.0-derivative-works/index.html`, `site.css`, `.nojekyll`
+
+Each generated format directory contains one normalized whole-book file, chapter files named
+`Capitolo-XX`, and section files grouped into `Capitolo-XX/` directories with section titles in
+their filenames.
 
 ## Other Commands
 
@@ -103,6 +107,9 @@ just site
 just check-epub
 just clean
 ```
+
+The `lessons-*` commands now build full format collections: the normalized whole book, chapter
+files, and section files.
 
 `just clean` removes generated local artifacts and site files but leaves the copied source EPUB in
 place. `just clean-all` removes the full ignored derivative directory.

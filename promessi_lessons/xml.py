@@ -9,7 +9,7 @@ CONTAINER_NS = {"c": "urn:oasis:names:tc:opendocument:xmlns:container"}
 OPF_NS = {"opf": "http://www.idpf.org/2007/opf"}
 XML_NS = "http://www.w3.org/XML/1998/namespace"
 EPUB_NS = "http://www.idpf.org/2007/ops"
-SEC_RE = re.compile(r"^(\d+)\.(\d+)\b(.*)")
+SEC_RE = re.compile(r"^(\d+)\s*\.\s*(\d+)\b(.*)")
 CHAPTER_RE = re.compile(r"^Capitolo\s+(\d+)\b")
 HEADING_TAGS = {f"{{{NS['x']}}}h1", f"{{{NS['x']}}}h2", f"{{{NS['x']}}}h3"}
 
@@ -47,9 +47,13 @@ def parse_section_header_text(elem):
         return None
     ch_s, sec_s, rest = match.groups()
     try:
-        return int(ch_s), int(sec_s), (rest or "").strip()
+        return int(ch_s), int(sec_s), strip_audio_link_text(rest or "").strip()
     except ValueError:
         return None
+
+
+def strip_audio_link_text(text):
+    return re.sub(r"\bFILE\s+AUDIO\b", "", text, flags=re.IGNORECASE).strip()
 
 
 def unwrap_google_redirect(url):
@@ -81,4 +85,3 @@ def is_local_reference(reference):
     return bool(reference) and not reference.startswith(
         ("http://", "https://", "/", "data:", "mailto:")
     )
-

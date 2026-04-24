@@ -2,6 +2,16 @@ from promessi_lessons.model import Chapter, Lesson
 from promessi_lessons.xml import parse_chapter_header_number, parse_section_header_text
 
 
+def chapter_title_from_nodes(nodes):
+    for node in nodes:
+        section = parse_section_header_text(node)
+        if section is None:
+            continue
+        _, _, title = section
+        return title
+    return ""
+
+
 def collect_chapters(nodes):
     chapters = []
     current_nodes = []
@@ -11,7 +21,13 @@ def collect_chapters(nodes):
         chapter_number = parse_chapter_header_number(node)
         if chapter_number is not None:
             if current_ch_num is not None:
-                chapters.append(Chapter(number=current_ch_num, nodes=current_nodes))
+                chapters.append(
+                    Chapter(
+                        number=current_ch_num,
+                        title=chapter_title_from_nodes(current_nodes),
+                        nodes=current_nodes,
+                    )
+                )
                 current_nodes = []
 
             current_ch_num = chapter_number
@@ -22,7 +38,13 @@ def collect_chapters(nodes):
             current_nodes.append(node)
 
     if current_ch_num is not None and current_nodes:
-        chapters.append(Chapter(number=current_ch_num, nodes=current_nodes))
+        chapters.append(
+            Chapter(
+                number=current_ch_num,
+                title=chapter_title_from_nodes(current_nodes),
+                nodes=current_nodes,
+            )
+        )
 
     return chapters
 
@@ -102,4 +124,3 @@ def collect_lessons(nodes):
 
     flush_current()
     return lessons, warnings
-
