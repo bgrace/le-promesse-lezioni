@@ -289,3 +289,7 @@ def main():
         print(f"Done. Wrote {count} files to {out_dir}")
     finally:
         source.close()
+
+
+if __name__ == "__main__":
+    main()

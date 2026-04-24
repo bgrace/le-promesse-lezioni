@@ -1,0 +1,19 @@
+version = 1
+revision = 3
+requires-python = ">=3.10"
+
+[[package]]
+name = "promessi-lessons"
+version = "0.1.0"
+source = { directory = "../lesson-material" }
+
+[[package]]
+name = "promessi-website"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "promessi-lessons" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "promessi-lessons", directory = "../lesson-material" }]

@@ -1,5 +1,5 @@
 * Context
-The source of truth is the original EPUB export of a simplified version of "I promessi sposi". We split it into short LingQ-ready lessons using subsections marked by H3 headers like "N.M Title". Script is `split_chapters.py` (Python 3, no deps).
+The source of truth is the original EPUB export of a simplified version of "I promessi sposi". We split it into short LingQ-ready lessons using subsections marked by H3 headers like "N.M Title". The lesson generator lives in the `lesson-material/` uv project; the static site builder lives in the separate `website/` uv project.
 
 * Done
 - [X] Detect chapters via H2 "Capitolo N"
@@ -10,7 +10,7 @@ The source of truth is the original EPUB export of a simplified version of "I pr
 - [X] Produce standalone EPUB output per lesson with embedded local images
 - [X] Rewrite relative image paths when output dir differs
 - [X] Generate EPUB, HTML, and TXT collections with whole-book, chapter, and section files
-- [X] Set the repo up as a `uv` project with a console entry point
+- [X] Split the repo into separate `lesson-material/` and `website/` uv projects with console entry points
 - [X] Keep upstream-derived source and generated output under ignored `cc-by-nc-4.0-derivative-works/`
 - [X] Strip inline English glosses by default, with an opt-out flag
 - [X] Include section titles in section filenames

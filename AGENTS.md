@@ -12,13 +12,15 @@ Branch and License Model
 - Upstream-derived content attribution is documented in `ATTRIBUTION.md`.
 
 Key Files and Layout on `main`
-- Script entry point: `split_chapters.py`
-- Source package: `promessi_lessons/`
-- Source-copy helper: `prepare_source.py`
-- GitHub Pages generator: `build_site.py`
-- Site stylesheet source: `site.css`
-- Project metadata: `pyproject.toml`
-- Lockfile: `uv.lock`
+- Lesson material uv project: `lesson-material/`
+- Lesson script entry point: `lesson-material/split_chapters.py`
+- Lesson source package: `lesson-material/promessi_lessons/`
+- Source-copy helper: `lesson-material/promessi_lessons/prepare_source.py`
+- EPUB validation helper: `lesson-material/promessi_lessons/check_epubs.py`
+- Website uv project: `website/`
+- GitHub Pages generator: `website/promessi_site/build.py`
+- Site stylesheet source: `website/site.css`
+- Project metadata and lockfiles: `lesson-material/pyproject.toml`, `lesson-material/uv.lock`, `website/pyproject.toml`, `website/uv.lock`
 - Task runner: `justfile`
 - Code license: `LICENSE`
 - Content attribution: `ATTRIBUTION.md`
@@ -41,8 +43,8 @@ Ignored CC BY-NC Local Build Directory
 Canonical Source Handling
 - The canonical original EPUB is stored on `gh-pages` at:
   - `source/original/I promessi sposi Edizione semplificata.epub`
-- `prepare_source.py` copies that EPUB from `gh-pages` or `origin/gh-pages` into the ignored local build directory.
-- For migration compatibility, `prepare_source.py` also recognizes the old `gh-pages:source/I promessi sposi Edizione semplificata.epub` path.
+- `promessi-prepare-source` copies that EPUB from `gh-pages` or `origin/gh-pages` into the ignored local build directory.
+- For migration compatibility, the source helper also recognizes the old `gh-pages:source/I promessi sposi Edizione semplificata.epub` path.
 
 How Chapters and Sections Are Marked in the Source
 - The source EPUB contains an XHTML document with chapter headers like `<h2>...Capitolo N...</h2>`.
@@ -52,6 +54,7 @@ How Chapters and Sections Are Marked in the Source
 
 Splitter Script Overview
 - Language: Python 3.
+- The exporter is packaged as the `lesson-material/` uv project; the website is packaged separately under `website/`.
 - Input can be an EPUB or standalone XHTML file.
 - Modes:
   - `--by=all` (default): emits the normalized whole book, chapter files, and section files in one format directory.

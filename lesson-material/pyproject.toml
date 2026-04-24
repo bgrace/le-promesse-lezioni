@@ -13,5 +13,10 @@ authors = [
 ]
 dependencies = []
 
+[project.scripts]
+promessi-split-chapters = "promessi_lessons.cli:main"
+promessi-prepare-source = "promessi_lessons.prepare_source:main"
+promessi-check-epubs = "promessi_lessons.check_epubs:main"
+
 [tool.setuptools]
 packages = ["promessi_lessons"]

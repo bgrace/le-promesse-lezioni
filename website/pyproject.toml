@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "promessi-website"
+version = "0.1.0"
+description = "Build the GitHub Pages site for the Promessi lesson artifacts."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "B. Grace" },
+]
+dependencies = [
+  "promessi-lessons",
+]
+
+[project.scripts]
+promessi-build-site = "promessi_site.build:main"
+
+[tool.setuptools]
+packages = ["promessi_site"]
+
+[tool.uv.sources]
+promessi-lessons = { path = "../lesson-material", editable = false }

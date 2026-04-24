@@ -65,6 +65,12 @@ just build
 `just build` copies the canonical source EPUB from `gh-pages` into the ignored local directory,
 then emits every generated format and the static website preview.
 
+The two workflows are separate uv projects:
+
+- `lesson-material/` owns source preparation, lesson generation, and EPUB validation.
+- `website/` owns the GitHub Pages site builder and stylesheet, and depends on the lesson package
+  through a local uv path dependency.
+
 Generated local files go under:
 
 ```text
@@ -98,6 +104,8 @@ their filenames.
 ## Other Commands
 
 ```bash
+just sync-lessons
+just sync-website
 just prepare-source
 just lessons-epub
 just lessons-html

@@ -16,9 +16,16 @@ just build
 Those commands install the local environment, copy the canonical source EPUB from `gh-pages`, emit
 all lesson formats, build the static site files, and validate generated EPUBs with `epubcheck`.
 
+The repo contains two uv projects:
+
+- `lesson-material/`: source copy, lesson export, and EPUB validation commands
+- `website/`: static site generation and site assets
+
 ## Individual Steps
 
 ```bash
+just sync-lessons
+just sync-website
 just prepare-source
 just lessons-epub
 just lessons-html
@@ -61,14 +68,15 @@ Capitolo-01/01-01-Don-Abbondio.<format>
 
 ## Code Layout
 
-- `source.py` reads EPUB or XHTML input
-- `extract.py` finds chapters and numbered lessons
-- `paths.py` centralizes generated artifact naming
-- `transforms.py` runs cleanup passes before rendering
-- `render.py` writes EPUB, HTML, and TXT output
-- `cli.py` keeps the command surface thin
-- `build_site.py` renders the GitHub Pages publication site into the ignored derivative directory
-- `prepare_source.py` copies the canonical source EPUB from `gh-pages`
+- `lesson-material/promessi_lessons/source.py` reads EPUB or XHTML input
+- `lesson-material/promessi_lessons/extract.py` finds chapters and numbered lessons
+- `lesson-material/promessi_lessons/paths.py` centralizes generated artifact naming
+- `lesson-material/promessi_lessons/transforms.py` runs cleanup passes before rendering
+- `lesson-material/promessi_lessons/render.py` writes EPUB, HTML, and TXT output
+- `lesson-material/promessi_lessons/cli.py` keeps the lesson command surface thin
+- `lesson-material/promessi_lessons/prepare_source.py` copies the canonical source EPUB from `gh-pages`
+- `website/promessi_site/build.py` renders the GitHub Pages publication site into the ignored derivative directory
+- `website/site.css` is the source stylesheet copied into the publication output
 
 ## Annotation Cleanup
 

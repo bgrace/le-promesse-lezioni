@@ -1,6 +1,9 @@
 set positional-arguments
 
 derivative_dir := "cc-by-nc-4.0-derivative-works"
+lesson_project := "lesson-material"
+website_project := "website"
+uv_cache_dir := ".uv-cache"
 source := derivative_dir / "source/original/I promessi sposi Edizione semplificata.epub"
 epub_dir := derivative_dir / "generated/epub"
 html_dir := derivative_dir / "generated/html"
@@ -11,32 +14,38 @@ default:
   @just --list
 
 sync:
-  uv venv
-  uv sync
+  UV_CACHE_DIR="{{uv_cache_dir}}" uv sync --project "{{lesson_project}}" --no-install-project --no-install-local
+  UV_CACHE_DIR="{{uv_cache_dir}}" uv sync --project "{{website_project}}" --no-install-project --no-install-local
+
+sync-lessons:
+  UV_CACHE_DIR="{{uv_cache_dir}}" uv sync --project "{{lesson_project}}" --no-install-project --no-install-local
+
+sync-website:
+  UV_CACHE_DIR="{{uv_cache_dir}}" uv sync --project "{{website_project}}" --no-install-project --no-install-local
 
 setup-worktree:
   just sync
 
 prepare-source:
-  .venv/bin/python3 prepare_source.py "{{source}}"
+  PYTHONPATH="{{lesson_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{lesson_project}}" --no-sync python -m promessi_lessons.prepare_source "{{source}}"
 
 lessons-epub: prepare-source
-  .venv/bin/python3 split_chapters.py "{{source}}" "{{epub_dir}}"
+  PYTHONPATH="{{lesson_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{lesson_project}}" --no-sync python -m promessi_lessons.cli "{{source}}" "{{epub_dir}}"
 
 lessons-html: prepare-source
-  .venv/bin/python3 split_chapters.py "{{source}}" "{{html_dir}}" --format=html
+  PYTHONPATH="{{lesson_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{lesson_project}}" --no-sync python -m promessi_lessons.cli "{{source}}" "{{html_dir}}" --format=html
 
 lessons-txt: prepare-source
-  .venv/bin/python3 split_chapters.py "{{source}}" "{{txt_dir}}" --format=txt
+  PYTHONPATH="{{lesson_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{lesson_project}}" --no-sync python -m promessi_lessons.cli "{{source}}" "{{txt_dir}}" --format=txt
 
 chapters-epub: prepare-source
-  .venv/bin/python3 split_chapters.py "{{source}}" "{{epub_dir}}" --format=epub --by=chapters
+  PYTHONPATH="{{lesson_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{lesson_project}}" --no-sync python -m promessi_lessons.cli "{{source}}" "{{epub_dir}}" --format=epub --by=chapters
 
 check-epub:
-  .venv/bin/python3 check_epubs.py "{{epub_dir}}"
+  PYTHONPATH="{{lesson_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{lesson_project}}" --no-sync python -m promessi_lessons.check_epubs "{{epub_dir}}"
 
 site: prepare-source
-  .venv/bin/python3 build_site.py
+  PYTHONPATH="{{lesson_project}}:{{website_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{website_project}}" --no-sync python -m promessi_site.build
 
 clean:
   rm -rf "{{derivative_dir}}/generated" "{{derivative_dir}}/index.html" "{{derivative_dir}}/site.css" "{{derivative_dir}}/.nojekyll" "{{derivative_dir}}/ATTRIBUTION.md"

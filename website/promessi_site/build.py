@@ -17,7 +17,15 @@ from promessi_lessons.source import SourceBundle
 from promessi_lessons.xml import NS
 
 
-ROOT = Path(__file__).resolve().parent
+def find_repo_root() -> Path:
+    candidates = [Path.cwd(), *Path(__file__).resolve().parents]
+    for candidate in candidates:
+        if (candidate / "ATTRIBUTION.md").exists() and (candidate / "justfile").exists():
+            return candidate
+    raise RuntimeError("Could not find repository root from the current working directory.")
+
+
+ROOT = find_repo_root()
 DERIVATIVE_DIR = ROOT / "cc-by-nc-4.0-derivative-works"
 SOURCE_FILENAME = "I promessi sposi Edizione semplificata.epub"
 SOURCE_PATH = DERIVATIVE_DIR / "source" / "original" / SOURCE_FILENAME
@@ -399,7 +407,7 @@ def build_html(chapters: list[ChapterRow], lessons: list[LessonRow], warnings: l
 
 def write_static_files() -> None:
     DERIVATIVE_DIR.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(ROOT / "site.css", DERIVATIVE_DIR / "site.css")
+    shutil.copyfile(ROOT / "website" / "site.css", DERIVATIVE_DIR / "site.css")
     shutil.copyfile(ROOT / "ATTRIBUTION.md", DERIVATIVE_DIR / "ATTRIBUTION.md")
     (DERIVATIVE_DIR / ".nojekyll").write_text("", encoding="utf-8")
 
