@@ -7,7 +7,7 @@ Goal
 Branch and License Model
 - `main` is the code/tooling/docs branch and is licensed under Apache-2.0.
 - `main` must not track the upstream source EPUB or generated derived lesson artifacts.
-- `gh-pages` is an orphan publication branch for CC BY-NC 4.0 material. It contains the static site, original source EPUB, generated lesson artifacts, and attribution notice.
+- `gh-pages` is an orphan publication branch for CC BY-NC 4.0 material. It contains the static site, original source EPUB, imported audio, generated lesson artifacts, and attribution notice.
 - A user who checks out only `main` should not receive a copy of the upstream-derived source or generated content.
 - Upstream-derived content attribution is documented in `ATTRIBUTION.md`.
 
@@ -32,6 +32,8 @@ Ignored CC BY-NC Local Build Directory
 - This directory is ignored by git on `main`.
 - Copied source EPUB:
   - `cc-by-nc-4.0-derivative-works/source/original/I promessi sposi Edizione semplificata.epub`
+- Imported source audio:
+  - `cc-by-nc-4.0-derivative-works/source/audio/`
 - Generated outputs:
   - EPUB collection: `cc-by-nc-4.0-derivative-works/generated/epub/`
   - HTML collection: `cc-by-nc-4.0-derivative-works/generated/html/`
@@ -81,6 +83,8 @@ Usage
   - `just build`
 - Copy source only:
   - `just prepare-source`
+- Import source audio:
+  - `just import-audio`
 - EPUB collection:
   - `just lessons-epub`
 - HTML collection:
@@ -108,6 +112,7 @@ Publishing Branch Shape
   - `index.html`
   - `site.css`
   - `source/original/I promessi sposi Edizione semplificata.epub`
+  - `source/audio/...`
   - `generated/...`
 - `gh-pages` should not contain Python source, `pyproject.toml`, `uv.lock`, `justfile`, Apache `LICENSE`, or repo tooling.
 
@@ -116,7 +121,8 @@ LingQ Import Notes
 - TXT is most robust if images and formatting are not needed.
 - Minimal HTML keeps headings and images.
 - Short subsection lessons import and review better than large chapter-size files.
-- External links are preserved when useful, but source `FILE AUDIO` links are stripped from generated products for now.
+- External links are preserved when useful, but source `FILE AUDIO` heading clutter is stripped from generated products.
+- Imported audio is cross-linked into section-level HTML lessons and the static site catalog when present locally.
 
 Verification Expectations
 - `just build` should produce 129 files per generated format: 1 whole-book file, 16 chapter files, and 112 section files.

@@ -17,6 +17,7 @@ dependencies = []
 promessi-split-chapters = "promessi_lessons.cli:main"
 promessi-prepare-source = "promessi_lessons.prepare_source:main"
 promessi-check-epubs = "promessi_lessons.check_epubs:main"
+promessi-import-audio = "promessi_lessons.audio:main"
 
 [tool.setuptools]
 packages = ["promessi_lessons"]

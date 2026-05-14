@@ -9,6 +9,7 @@ from pathlib import Path
 import shutil
 from string import Template
 
+from promessi_lessons.audio import audio_relative_path
 from promessi_lessons.extract import collect_chapters, collect_lessons
 from promessi_lessons.paths import (
     BOOK_TITLE,
@@ -32,6 +33,7 @@ ROOT = find_repo_root()
 DERIVATIVE_DIR = ROOT / "cc-by-nc-4.0-derivative-works"
 SOURCE_FILENAME = "I promessi sposi Edizione semplificata.epub"
 SOURCE_PATH = DERIVATIVE_DIR / "source" / "original" / SOURCE_FILENAME
+AUDIO_DIR = DERIVATIVE_DIR / "source" / "audio"
 RESOURCE_ROOT = files("promessi_site") / "resources"
 TEMPLATE_ROOT = RESOURCE_ROOT / "templates"
 
@@ -83,6 +85,7 @@ PUBLISHING_SURFACE = [
     ("EPUB collection", "epub", "Whole-book, chapter, and subsection EPUB exports."),
     ("HTML collection", "html", "Whole-book, chapter, and subsection HTML exports."),
     ("TXT collection", "txt", "Whole-book, chapter, and subsection plain text exports."),
+    ("Audio collection", "audio", "Section-level MP3 files served directly from this site."),
     ("Original EPUB", "source", "The original, unmodified source EPUB used for reproducible builds."),
 ]
 
@@ -143,9 +146,14 @@ def scan_existing_outputs() -> dict[str, set[str]]:
         "epub": DERIVATIVE_DIR / "generated" / "epub",
         "html": DERIVATIVE_DIR / "generated" / "html",
         "txt": DERIVATIVE_DIR / "generated" / "txt",
+        "audio": AUDIO_DIR,
     }
     return {
-        key: {path.relative_to(directory).as_posix() for path in directory.rglob("*") if path.is_file()}
+        key: {
+            path.relative_to(directory).as_posix()
+            for path in directory.rglob("*")
+            if path.is_file() and (key != "audio" or path.suffix == ".mp3")
+        }
         if directory.exists()
         else set()
         for key, directory in roots.items()
@@ -214,11 +222,17 @@ def lesson_row(lesson: LessonRow, existing: dict[str, set[str]]) -> str:
     html_name = lesson_path("", lesson.chapter_number, lesson.section_number, lesson.title, "html").as_posix()
     txt_name = lesson_path("", lesson.chapter_number, lesson.section_number, lesson.title, "txt").as_posix()
     epub_name = lesson_path("", lesson.chapter_number, lesson.section_number, lesson.title, "epub").as_posix()
+    audio_name = audio_relative_path(
+        lesson.chapter_number,
+        lesson.section_number,
+        lesson.title,
+    ).as_posix()
     artifact_links = "".join(
         [
             artifact_link("HTML", f"generated/html/{html_name}", html_name in existing["html"]),
             artifact_link("TXT", f"generated/txt/{txt_name}", txt_name in existing["txt"]),
             artifact_link("EPUB", f"generated/epub/{epub_name}", epub_name in existing["epub"]),
+            artifact_link("AUDIO", f"source/audio/{audio_name}", audio_name in existing["audio"]),
         ]
     )
     return render_template(
@@ -276,7 +290,13 @@ def build_html(chapters: list[ChapterRow], lessons: list[LessonRow], warnings: l
     )
     upstream = "\n".join(upstream_card(item) for item in UPSTREAM_MATERIALS)
     surfaces = "\n".join(
-        surface_card(title, slug, description, existing, 1 if slug == "source" else collection_total)
+        surface_card(
+            title,
+            slug,
+            description,
+            existing,
+            1 if slug == "source" else lesson_total if slug == "audio" else collection_total,
+        )
         for title, slug, description in PUBLISHING_SURFACE
     )
     chapters_html = "\n".join(

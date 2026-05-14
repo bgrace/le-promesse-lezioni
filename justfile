@@ -5,6 +5,7 @@ lesson_project := "lesson-material"
 website_project := "website"
 uv_cache_dir := ".uv-cache"
 source := derivative_dir / "source/original/I promessi sposi Edizione semplificata.epub"
+audio_dir := derivative_dir / "source/audio"
 epub_dir := derivative_dir / "generated/epub"
 html_dir := derivative_dir / "generated/html"
 txt_dir := derivative_dir / "generated/txt"
@@ -28,6 +29,9 @@ setup-worktree:
 
 prepare-source:
   PYTHONPATH="{{lesson_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{lesson_project}}" --no-sync python -m promessi_lessons.prepare_source "{{source}}"
+
+import-audio: prepare-source
+  PYTHONPATH="{{lesson_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{lesson_project}}" --no-sync python -m promessi_lessons.audio "{{source}}" "{{audio_dir}}"
 
 lessons-epub: prepare-source
   PYTHONPATH="{{lesson_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{lesson_project}}" --no-sync python -m promessi_lessons.cli "{{source}}" "{{epub_dir}}"

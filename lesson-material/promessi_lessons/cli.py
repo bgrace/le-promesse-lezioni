@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import xml.etree.ElementTree as ET
 
+from promessi_lessons.audio import DEFAULT_AUDIO_DIR, audio_path
 from promessi_lessons.extract import collect_chapters, collect_lessons
 from promessi_lessons.paths import BOOK_TITLE, book_path, chapter_path, lesson_path
 from promessi_lessons.render import (
@@ -69,6 +70,31 @@ def make_section_content(lesson):
         f"{lesson.chapter_number}.{lesson.section_number} {lesson.title}".strip()
     )
     return [chapter_header, section_header] + lesson.nodes
+
+
+def add_audio_to_section_content(content_nodes, lesson, out_path):
+    source_path = audio_path(
+        DEFAULT_AUDIO_DIR,
+        lesson.chapter_number,
+        lesson.section_number,
+        lesson.title,
+    )
+    if not source_path.exists():
+        return content_nodes
+
+    href = os.path.relpath(source_path, Path(out_path).parent).replace(os.sep, "/")
+    container = ET.Element(f"{{{NS['x']}}}div", attrib={"class": "lesson-audio"})
+    audio = ET.SubElement(
+        container,
+        f"{{{NS['x']}}}audio",
+        attrib={"controls": "controls", "preload": "metadata", "src": href},
+    )
+    fallback = ET.SubElement(audio, f"{{{NS['x']}}}a", attrib={"href": href})
+    fallback.text = "Audio"
+    download = ET.SubElement(container, f"{{{NS['x']}}}p")
+    link = ET.SubElement(download, f"{{{NS['x']}}}a", attrib={"href": href})
+    link.text = "Audio MP3"
+    return [*content_nodes[:2], container, *content_nodes[2:]]
 
 
 def chapter_display_title(chapter):
@@ -179,6 +205,7 @@ def write_section_outputs(lessons, out_dir, out_format, source, args):
                 lesson.title,
                 out_format,
             )
+            content_nodes = add_audio_to_section_content(content_nodes, lesson, out_path)
             write_html(
                 out_path,
                 title_text,

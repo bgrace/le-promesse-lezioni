@@ -27,6 +27,7 @@ The repo contains two uv projects:
 just sync-lessons
 just sync-website
 just prepare-source
+just import-audio
 just lessons-epub
 just lessons-html
 just lessons-txt
@@ -38,6 +39,13 @@ just check-epub
 
 The `lessons-*` commands emit a complete collection for that format: whole book, chapter files,
 and section files.
+
+`just import-audio` downloads the public MP3 files linked from section headings into
+`cc-by-nc-4.0-derivative-works/source/audio/`. Rebuild HTML lessons after importing audio to add
+per-section audio controls, and rebuild the site to expose catalog `AUDIO` links.
+
+Published audio is served directly from `source/audio/` on the `gh-pages` branch, not from Git LFS,
+so the static site can serve MP3s without relying on the upstream Drive links.
 
 Use `just preview` to rebuild the static site, print a clickable local URL, and serve the ignored
 derivative directory at <http://localhost:8000/>. Use `just preview 8080` to choose another port.
@@ -89,7 +97,8 @@ By default the pipeline strips inline English glosses such as `rammarico (= regr
 `--keep-english-annotations` to preserve them.
 
 The pipeline also strips source `FILE AUDIO` links from generated products until there is a
-deliberate audio hosting strategy.
+deliberate audio hosting strategy. Imported local audio is linked back into section-level HTML
+lessons separately.
 
 ## LingQ Note
 

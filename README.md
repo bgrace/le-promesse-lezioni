@@ -28,7 +28,7 @@ The editorial transformations are intentionally modest:
 - normalize or remove broken links and redirects
 - strip page-break artifacts
 - strip inline English glosses by default, with an option to preserve them
-- strip source `FILE AUDIO` links until audio hosting is resolved
+- strip source `FILE AUDIO` heading clutter while optionally importing and linking local MP3 audio
 
 ## Branch And License Model
 
@@ -36,7 +36,7 @@ This repo intentionally separates code from upstream-derived content.
 
 - `main`: Apache-2.0 source code, docs, build scripts, and site generator only.
 - `gh-pages`: CC BY-NC 4.0 publication branch containing the original source EPUB, generated
-  lesson artifacts, static site files, and attribution notice.
+  lesson artifacts, imported source audio, static site files, and attribution notice.
 - local output: ignored `cc-by-nc-4.0-derivative-works/` directory containing copied source and
   generated artifacts.
 
@@ -95,6 +95,7 @@ The project emits these artifact families:
 - EPUB collection: `cc-by-nc-4.0-derivative-works/generated/epub/`
 - HTML collection: `cc-by-nc-4.0-derivative-works/generated/html/`
 - TXT collection: `cc-by-nc-4.0-derivative-works/generated/txt/`
+- Imported audio: `cc-by-nc-4.0-derivative-works/source/audio/`
 - GitHub Pages site files: `cc-by-nc-4.0-derivative-works/index.html`, `site.css`, `.nojekyll`
 
 Each generated format directory contains one normalized whole-book file, chapter files named
@@ -107,6 +108,7 @@ their filenames.
 just sync-lessons
 just sync-website
 just prepare-source
+just import-audio
 just lessons-epub
 just lessons-html
 just lessons-txt
@@ -119,6 +121,14 @@ just clean
 
 The `lessons-*` commands now build full format collections: the normalized whole book, chapter
 files, and section files.
+
+`just import-audio` downloads the public Italian 102 MP3 files referenced by the source headings
+into the ignored derivative tree. After audio is imported, `just lessons-html` adds audio controls
+to section-level HTML lessons and `just site` adds `AUDIO` links to the lesson catalog.
+
+Audio is published directly from GitHub Pages under `source/audio/` on the `gh-pages` branch. This
+keeps the MP3s durable if the upstream Drive links disappear, while keeping `main` free of
+CC BY-NC media files.
 
 `just preview` rebuilds the static site, prints a clickable local URL, and serves
 `cc-by-nc-4.0-derivative-works/` at <http://localhost:8000/>. Pass a different port with
