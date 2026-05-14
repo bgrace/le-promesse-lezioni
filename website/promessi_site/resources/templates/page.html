@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Le Promesse Lezioni</title>
+    <meta name="description" content="Lesson-sized exports derived from Leggiamo 102: I promessi sposi - edizione semplificata.">
+    <link rel="stylesheet" href="site.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <p class="eyebrow">GitHub Pages publication</p>
+        <h1>Le Promesse Lezioni</h1>
+        <p class="lede">
+          Clean, lesson-sized exports derived from Andrea Petri's <em>Leggiamo 102:
+          $book_title</em>, prepared for import into
+          systems such as LingQ.
+        </p>
+        <div class="hero-actions">
+          $normalized_epub_link
+          <a class="button button-primary" href="source/original/$source_filename">Original source EPUB</a>
+          <a class="button button-secondary" href="https://leggiamoitaliano.weebly.com/italian-102.html">Upstream Italian 102</a>
+          <a class="button button-secondary" href="ATTRIBUTION.md">Attribution</a>
+        </div>
+        <ul class="hero-stats">
+          <li><strong>$chapter_total</strong><span>chapters</span></li>
+          <li><strong>$lesson_total</strong><span>subsection lessons</span></li>
+          <li><strong>$chapter_10_lessons</strong><span>chapter 10 lessons</span></li>
+        </ul>
+      </header>
+
+      <main>
+        <section class="panel">
+          <div class="section-heading">
+            <p class="eyebrow">Alignment</p>
+            <h2>Purpose of this derivative edition</h2>
+          </div>
+          <div class="three-up">
+            <article class="mini-card">
+              <h3>Open educational reuse</h3>
+              <p>The upstream site frames the readings as OER and invites instructor adaptation.</p>
+            </article>
+            <article class="mini-card">
+              <h3>Transformations, not replacement</h3>
+              <p>This project preserves attribution while changing delivery format for study systems.</p>
+            </article>
+            <article class="mini-card">
+              <h3>Clear separation</h3>
+              <p>Code lives on the Apache-2.0 main branch; this branch publishes CC BY-NC 4.0 content.</p>
+            </article>
+          </div>
+          <p class="fine-print">This page is an editorial/readability assessment, not legal advice.</p>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <p class="eyebrow">Licensing</p>
+            <h2>Code and content are intentionally separated</h2>
+          </div>
+          <div class="three-up">
+            <article class="mini-card">
+              <h3>Code: Apache-2.0</h3>
+              <p>The exporter and build tooling live on the main branch under a software license.</p>
+            </article>
+            <article class="mini-card">
+              <h3>Content: CC BY-NC 4.0</h3>
+              <p>The source EPUB and generated artifacts remain attributed to Leggiamo! by Andrea Petri.</p>
+            </article>
+            <article class="mini-card">
+              <h3>Original preserved</h3>
+              <p>The linked source EPUB is the original, untransformed input used for reproducible builds.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <p class="eyebrow">Upstream catalog</p>
+            <h2>Material available from Leggiamo!</h2>
+          </div>
+          <div class="resource-grid">$upstream</div>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <p class="eyebrow">Artifacts</p>
+            <h2>Current derived collection</h2>
+          </div>
+          <div class="overview-grid">$overview</div>
+          $warning_note
+          <p class="body-copy">
+            Each format contains one normalized whole-book file, $chapter_total chapter files,
+            and $lesson_total section-level lesson files grouped under chapter directories.
+            Each chapter exposes seven subsection lessons.
+          </p>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <p class="eyebrow">Publishing surface</p>
+            <h2>What this branch hosts</h2>
+          </div>
+          <div class="surface-grid">$surfaces</div>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <p class="eyebrow">Lesson browser</p>
+            <h2>Chapter-by-chapter lesson catalog</h2>
+          </div>
+          <div class="chapter-list">$chapters_html</div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>
+          Upstream-derived reading content is attributed to
+          <a href="https://leggiamoitaliano.weebly.com/">Leggiamo!</a> by Andrea Petri under
+          <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>.
+        </p>
+        <p>The source code that generates this site and these artifacts lives separately on the Apache-2.0 main branch.</p>
+      </footer>
+    </div>
+  </body>
+</html>

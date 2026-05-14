@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
+from functools import lru_cache
 from html import escape
+from importlib.resources import files
 from pathlib import Path
 import shutil
+from string import Template
 
 from promessi_lessons.extract import collect_chapters, collect_lessons
 from promessi_lessons.paths import (
@@ -29,6 +32,8 @@ ROOT = find_repo_root()
 DERIVATIVE_DIR = ROOT / "cc-by-nc-4.0-derivative-works"
 SOURCE_FILENAME = "I promessi sposi Edizione semplificata.epub"
 SOURCE_PATH = DERIVATIVE_DIR / "source" / "original" / SOURCE_FILENAME
+RESOURCE_ROOT = files("promessi_site") / "resources"
+TEMPLATE_ROOT = RESOURCE_ROOT / "templates"
 
 
 UPSTREAM_MATERIALS = [
@@ -147,34 +152,44 @@ def scan_existing_outputs() -> dict[str, set[str]]:
     }
 
 
+@lru_cache
+def load_template(name: str) -> Template:
+    return Template((TEMPLATE_ROOT / name).read_text(encoding="utf-8"))
+
+
+def render_template(name: str, **context: object) -> str:
+    return load_template(name).substitute({key: str(value) for key, value in context.items()})
+
+
 def artifact_link(label: str, href: str, available: bool) -> str:
     if available:
-        return (
-            f'<a class="pill pill-live" href="{escape(href, quote=True)}">'
-            f"{escape(label)}</a>"
+        return render_template(
+            "artifact_link_live.html",
+            href=escape(href, quote=True),
+            label=escape(label),
         )
-    return f'<span class="pill pill-planned">{escape(label)}</span>'
+    return render_template("artifact_link_planned.html", label=escape(label))
 
 
 def upstream_card(item: dict[str, str]) -> str:
-    return (
-        '<article class="resource-card">'
-        f'<span class="resource-kind">{escape(item["kind"])}</span>'
-        f'<h3><a href="{escape(item["href"], quote=True)}">{escape(item["title"])}</a></h3>'
-        f"<p>{escape(item['description'])}</p>"
-        "</article>"
+    return render_template(
+        "upstream_card.html",
+        kind=escape(item["kind"]),
+        href=escape(item["href"], quote=True),
+        title=escape(item["title"]),
+        description=escape(item["description"]),
     )
 
 
 def overview_card(title: str, count: int, total: int, description: str) -> str:
     status = "ready" if count else "planned"
-    return (
-        '<article class="overview-card">'
-        f'<span class="overview-label">{escape(title)}</span>'
-        f"<strong>{count} / {total}</strong>"
-        f"<p>{escape(description)}</p>"
-        f'<span class="status-tag status-{status}">{status}</span>'
-        "</article>"
+    return render_template(
+        "overview_card.html",
+        title=escape(title),
+        count=count,
+        total=total,
+        description=escape(description),
+        status=status,
     )
 
 
@@ -186,12 +201,12 @@ def surface_card(title: str, slug: str, description: str, existing: dict[str, se
         count = len(existing.get(slug, set()))
         expected = total
     status = f"{count} published" if count else "placeholder"
-    return (
-        '<article class="surface-card">'
-        f"<h3>{escape(title)}</h3>"
-        f"<p>{escape(description)}</p>"
-        f'<div class="surface-meta"><span>{status}</span><span>{expected} expected</span></div>'
-        "</article>"
+    return render_template(
+        "surface_card.html",
+        title=escape(title),
+        description=escape(description),
+        status=escape(status),
+        expected=expected,
     )
 
 
@@ -199,17 +214,18 @@ def lesson_row(lesson: LessonRow, existing: dict[str, set[str]]) -> str:
     html_name = lesson_path("", lesson.chapter_number, lesson.section_number, lesson.title, "html").as_posix()
     txt_name = lesson_path("", lesson.chapter_number, lesson.section_number, lesson.title, "txt").as_posix()
     epub_name = lesson_path("", lesson.chapter_number, lesson.section_number, lesson.title, "epub").as_posix()
-    return (
-        '<li class="lesson-row">'
-        '<div class="lesson-copy">'
-        f'<span class="lesson-kicker">Capitolo {lesson.chapter_number}</span>'
-        f"<strong>{escape(lesson.label)}</strong>"
-        "</div>"
-        '<div class="pill-row">'
-        + artifact_link("HTML", f"generated/html/{html_name}", html_name in existing["html"])
-        + artifact_link("TXT", f"generated/txt/{txt_name}", txt_name in existing["txt"])
-        + artifact_link("EPUB", f"generated/epub/{epub_name}", epub_name in existing["epub"])
-        + "</div></li>"
+    artifact_links = "".join(
+        [
+            artifact_link("HTML", f"generated/html/{html_name}", html_name in existing["html"]),
+            artifact_link("TXT", f"generated/txt/{txt_name}", txt_name in existing["txt"]),
+            artifact_link("EPUB", f"generated/epub/{epub_name}", epub_name in existing["epub"]),
+        ]
+    )
+    return render_template(
+        "lesson_row.html",
+        chapter_number=lesson.chapter_number,
+        label=escape(lesson.label),
+        artifact_links=artifact_links,
     )
 
 
@@ -222,20 +238,24 @@ def chapter_block(
     chapter_epub = chapter_path("", chapter.number, "epub").as_posix()
     chapter_html = chapter_path("", chapter.number, "html").as_posix()
     chapter_txt = chapter_path("", chapter.number, "txt").as_posix()
-    summary = (
-        f'<summary><div><span class="chapter-kicker">Chapter {chapter.number:02d}</span>'
-        f"<h3>{escape(chapter.label)}</h3></div>"
-        f'<div class="summary-meta"><span>{len(lessons)} lessons</span>'
-        + '<div class="pill-row">'
-        + artifact_link("HTML", f"generated/html/{chapter_html}", chapter_html in existing["html"])
-        + artifact_link("TXT", f"generated/txt/{chapter_txt}", chapter_txt in existing["txt"])
-        + artifact_link("EPUB", f"generated/epub/{chapter_epub}", chapter_epub in existing["epub"])
-        + "</div>"
-        + "</div></summary>"
+    artifact_links = "".join(
+        [
+            artifact_link("HTML", f"generated/html/{chapter_html}", chapter_html in existing["html"]),
+            artifact_link("TXT", f"generated/txt/{chapter_txt}", chapter_txt in existing["txt"]),
+            artifact_link("EPUB", f"generated/epub/{chapter_epub}", chapter_epub in existing["epub"]),
+        ]
     )
     open_attr = " open" if open_by_default else ""
-    items = "\n".join(lesson_row(lesson, existing) for lesson in lessons)
-    return f'<details class="chapter-block"{open_attr}>{summary}<ol>{items}</ol></details>'
+    lesson_rows = "\n".join(lesson_row(lesson, existing) for lesson in lessons)
+    return render_template(
+        "chapter_block.html",
+        open_attr=open_attr,
+        chapter_number_padded=f"{chapter.number:02d}",
+        chapter_label=escape(chapter.label),
+        lesson_count=len(lessons),
+        artifact_links=artifact_links,
+        lesson_rows=lesson_rows,
+    )
 
 
 def build_html(chapters: list[ChapterRow], lessons: list[LessonRow], warnings: list[str]) -> str:
@@ -270,144 +290,31 @@ def build_html(chapters: list[ChapterRow], lessons: list[LessonRow], warnings: l
     )
     warning_note = ""
     if warnings:
-        warning_note = (
-            '<div class="note"><strong>Parser note.</strong> '
-            f"The source preserved {len(warnings)} numbering irregularity; this site keeps the original numbering."
-            "</div>"
-        )
+        warning_note = render_template("warning_note.html", warning_count=len(warnings))
 
-    return f"""<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Le Promesse Lezioni</title>
-    <meta name="description" content="Lesson-sized exports derived from Leggiamo 102: I promessi sposi - edizione semplificata.">
-    <link rel="stylesheet" href="site.css">
-  </head>
-  <body>
-    <div class="page-shell">
-      <header class="hero">
-        <p class="eyebrow">GitHub Pages publication</p>
-        <h1>Le Promesse Lezioni</h1>
-        <p class="lede">
-          Clean, lesson-sized exports derived from Andrea Petri's <em>Leggiamo 102:
-          {escape(BOOK_TITLE)}</em>, prepared for import into
-          systems such as LingQ.
-        </p>
-        <div class="hero-actions">
-          {artifact_link("Normalized EPUB", f"generated/epub/{normalized_epub}", normalized_epub in existing["epub"])}
-          <a class="button button-primary" href="source/original/{escape(SOURCE_FILENAME, quote=True)}">Original source EPUB</a>
-          <a class="button button-secondary" href="https://leggiamoitaliano.weebly.com/italian-102.html">Upstream Italian 102</a>
-          <a class="button button-secondary" href="ATTRIBUTION.md">Attribution</a>
-        </div>
-        <ul class="hero-stats">
-          <li><strong>{chapter_total}</strong><span>chapters</span></li>
-          <li><strong>{lesson_total}</strong><span>subsection lessons</span></li>
-          <li><strong>{counts.get(10, 0)}</strong><span>chapter 10 lessons</span></li>
-        </ul>
-      </header>
-
-      <main>
-        <section class="panel">
-          <div class="section-heading">
-            <p class="eyebrow">Alignment</p>
-            <h2>Purpose of this derivative edition</h2>
-          </div>
-          <div class="three-up">
-            <article class="mini-card">
-              <h3>Open educational reuse</h3>
-              <p>The upstream site frames the readings as OER and invites instructor adaptation.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Transformations, not replacement</h3>
-              <p>This project preserves attribution while changing delivery format for study systems.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Clear separation</h3>
-              <p>Code lives on the Apache-2.0 main branch; this branch publishes CC BY-NC 4.0 content.</p>
-            </article>
-          </div>
-          <p class="fine-print">This page is an editorial/readability assessment, not legal advice.</p>
-        </section>
-
-        <section class="panel">
-          <div class="section-heading">
-            <p class="eyebrow">Licensing</p>
-            <h2>Code and content are intentionally separated</h2>
-          </div>
-          <div class="three-up">
-            <article class="mini-card">
-              <h3>Code: Apache-2.0</h3>
-              <p>The exporter and build tooling live on the main branch under a software license.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Content: CC BY-NC 4.0</h3>
-              <p>The source EPUB and generated artifacts remain attributed to Leggiamo! by Andrea Petri.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Original preserved</h3>
-              <p>The linked source EPUB is the original, untransformed input used for reproducible builds.</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="section-heading">
-            <p class="eyebrow">Upstream catalog</p>
-            <h2>Material available from Leggiamo!</h2>
-          </div>
-          <div class="resource-grid">{upstream}</div>
-        </section>
-
-        <section class="panel">
-          <div class="section-heading">
-            <p class="eyebrow">Artifacts</p>
-            <h2>Current derived collection</h2>
-          </div>
-          <div class="overview-grid">{overview}</div>
-          {warning_note}
-          <p class="body-copy">
-            Each format contains one normalized whole-book file, {chapter_total} chapter files,
-            and {lesson_total} section-level lesson files grouped under chapter directories.
-            Each chapter exposes seven subsection lessons.
-          </p>
-        </section>
-
-        <section class="panel">
-          <div class="section-heading">
-            <p class="eyebrow">Publishing surface</p>
-            <h2>What this branch hosts</h2>
-          </div>
-          <div class="surface-grid">{surfaces}</div>
-        </section>
-
-        <section class="panel">
-          <div class="section-heading">
-            <p class="eyebrow">Lesson browser</p>
-            <h2>Chapter-by-chapter lesson catalog</h2>
-          </div>
-          <div class="chapter-list">{chapters_html}</div>
-        </section>
-      </main>
-
-      <footer class="site-footer">
-        <p>
-          Upstream-derived reading content is attributed to
-          <a href="https://leggiamoitaliano.weebly.com/">Leggiamo!</a> by Andrea Petri under
-          <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>.
-        </p>
-        <p>The source code that generates this site and these artifacts lives separately on the Apache-2.0 main branch.</p>
-      </footer>
-    </div>
-  </body>
-</html>
-"""
+    return render_template(
+        "page.html",
+        book_title=escape(BOOK_TITLE),
+        normalized_epub_link=artifact_link(
+            "Normalized EPUB",
+            f"generated/epub/{normalized_epub}",
+            normalized_epub in existing["epub"],
+        ),
+        source_filename=escape(SOURCE_FILENAME, quote=True),
+        chapter_total=chapter_total,
+        lesson_total=lesson_total,
+        chapter_10_lessons=counts.get(10, 0),
+        upstream=upstream,
+        overview=overview,
+        warning_note=warning_note,
+        surfaces=surfaces,
+        chapters_html=chapters_html,
+    )
 
 
 def write_static_files() -> None:
     DERIVATIVE_DIR.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(ROOT / "website" / "site.css", DERIVATIVE_DIR / "site.css")
+    (DERIVATIVE_DIR / "site.css").write_bytes((RESOURCE_ROOT / "site.css").read_bytes())
     shutil.copyfile(ROOT / "ATTRIBUTION.md", DERIVATIVE_DIR / "ATTRIBUTION.md")
     (DERIVATIVE_DIR / ".nojekyll").write_text("", encoding="utf-8")
 

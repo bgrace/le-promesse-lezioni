@@ -112,12 +112,17 @@ just lessons-html
 just lessons-txt
 just chapters-epub
 just site
+just preview
 just check-epub
 just clean
 ```
 
 The `lessons-*` commands now build full format collections: the normalized whole book, chapter
 files, and section files.
+
+`just preview` rebuilds the static site, prints a clickable local URL, and serves
+`cc-by-nc-4.0-derivative-works/` at <http://localhost:8000/>. Pass a different port with
+`just preview 8080`.
 
 `just clean` removes generated local artifacts and site files but leaves the copied source EPUB in
 place. `just clean-all` removes the full ignored derivative directory.

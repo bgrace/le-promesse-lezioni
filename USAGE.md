@@ -32,11 +32,15 @@ just lessons-html
 just lessons-txt
 just chapters-epub
 just site
+just preview
 just check-epub
 ```
 
 The `lessons-*` commands emit a complete collection for that format: whole book, chapter files,
 and section files.
+
+Use `just preview` to rebuild the static site, print a clickable local URL, and serve the ignored
+derivative directory at <http://localhost:8000/>. Use `just preview 8080` to choose another port.
 
 The copied source EPUB is:
 
@@ -76,7 +80,8 @@ Capitolo-01/01-01-Don-Abbondio.<format>
 - `lesson-material/promessi_lessons/cli.py` keeps the lesson command surface thin
 - `lesson-material/promessi_lessons/prepare_source.py` copies the canonical source EPUB from `gh-pages`
 - `website/promessi_site/build.py` renders the GitHub Pages publication site into the ignored derivative directory
-- `website/site.css` is the source stylesheet copied into the publication output
+- `website/promessi_site/resources/site.css` is the source stylesheet copied into the publication output
+- `website/promessi_site/resources/templates/` contains the static site templates
 
 ## Annotation Cleanup
 

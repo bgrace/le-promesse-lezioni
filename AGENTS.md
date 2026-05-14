@@ -19,7 +19,8 @@ Key Files and Layout on `main`
 - EPUB validation helper: `lesson-material/promessi_lessons/check_epubs.py`
 - Website uv project: `website/`
 - GitHub Pages generator: `website/promessi_site/build.py`
-- Site stylesheet source: `website/site.css`
+- Site stylesheet source: `website/promessi_site/resources/site.css`
+- Site templates: `website/promessi_site/resources/templates/`
 - Project metadata and lockfiles: `lesson-material/pyproject.toml`, `lesson-material/uv.lock`, `website/pyproject.toml`, `website/uv.lock`
 - Task runner: `justfile`
 - Code license: `LICENSE`
@@ -90,6 +91,8 @@ Usage
   - `just chapters-epub`
 - Build static site only:
   - `just site`
+- Preview static site locally:
+  - `just preview`
 - EPUB validation:
   - `just check-epub`
 - Clean generated files while keeping copied source:

@@ -21,5 +21,11 @@ promessi-build-site = "promessi_site.build:main"
 [tool.setuptools]
 packages = ["promessi_site"]
 
+[tool.setuptools.package-data]
+promessi_site = [
+  "resources/site.css",
+  "resources/templates/*.html",
+]
+
 [tool.uv.sources]
 promessi-lessons = { path = "../lesson-material", editable = false }

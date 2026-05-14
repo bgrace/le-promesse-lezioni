@@ -47,6 +47,13 @@ check-epub:
 site: prepare-source
   PYTHONPATH="{{lesson_project}}:{{website_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{website_project}}" --no-sync python -m promessi_site.build
 
+preview port="8000": site
+  @echo ""
+  @echo "Preview URL:"
+  @echo "http://localhost:{{port}}/"
+  @echo ""
+  PYTHONPATH="{{website_project}}" UV_CACHE_DIR="{{uv_cache_dir}}" uv run --project "{{website_project}}" --no-sync python -m http.server "{{port}}" --directory "{{derivative_dir}}"
+
 clean:
   rm -rf "{{derivative_dir}}/generated" "{{derivative_dir}}/index.html" "{{derivative_dir}}/site.css" "{{derivative_dir}}/.nojekyll" "{{derivative_dir}}/ATTRIBUTION.md"
 
